@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ひとやすみ</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #e9e3df;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ヘッダー */
+.header {
+  background: #e7c1c1;
+  padding: 14px;
+  text-align: center;
+  font-size: 18px;
+  color: #5a4a4a;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+/* チャット */
+.chat {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+/* メッセージ */
+.message {
+  display: flex;
+  margin-bottom: 14px;
+}
+
+.left { justify-content: flex-start; }
+.right { justify-content: flex-end; }
+
+/* アイコン */
+.icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  margin-right: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* 吹き出し */
+.bubble {
+  padding: 12px 16px;
+  border-radius: 18px;
+  max-width: 72%;
+  font-size: 15px;
+  line-height: 1.7;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  white-space: pre-line;
+}
+
+.left .bubble {
+  background: #ffffff;
+}
+
+.right .bubble {
+  background: #e7c1c1;
+  color: #4a3a3a;
+}
+
+/* タイピング（・・・） */
+.typing {
+  background: #ffffff;
+  padding: 10px 14px;
+  border-radius: 18px;
+}
+
+.dots span {
+  animation: blink 1.2s infinite;
+  opacity: 0;
+}
+
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ボタンエリア */
+.controls {
+  padding: 10px;
+  background: #f3eeee;
+}
+
+/* 横スクロール */
+.buttons {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* ボタン */
+button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  font-size: 13px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+.icon-mini {
+  font-size: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">ひとやすみ</div>
+<div id="chat" class="chat"></div>
+
+<div class="controls">
+  <div class="buttons">
+    <button onclick="userSend('疲れた', 'tired')">
+      <span class="icon-mini">😴</span>疲れた
+    </button>
+    <button onclick="userSend('落ち込んだ', 'down')">
+      <span class="icon-mini">😢</span>落ち込んだ
+    </button>
+    <button onclick="userSend('やる気でない', 'nomotivation')">
+      <span class="icon-mini">🌱</span>やる気でない
+    </button>
+    <button onclick="userSend('おまかせ', 'all')">
+      <span class="icon-mini">💗</span>おまかせ
+    </button>
+  </div>
+</div>
+
+<script>
+let lastMessage = "";
+let typingElement = null;
+
+/* メッセージ（必要に応じて100個版に差し替えOK） */
+const messages = {
+  tired: [
+    "今日は休むのが正解だよ〜",
+    "無理しなくていいよ😊",
+    "ゆっくりで大丈夫だよ"
+  ],
+  down: [
+    "そんな日もあるよ",
+    "ちゃんと頑張ってるよ",
+    "自分を責めなくていいよ"
+  ],
+  nomotivation: [
+    "1分だけやってみよう",
+    "始めるだけでえらい",
+    "小さくても一歩だよ"
+  ],
+  all: [
+    "今日もおつかれさま ☕",
+    "ちゃんとやってるよ",
+    "ゆっくりいこうね"
+  ]
+};
+
+/* ユーザー送信 */
+function userSend(text, category) {
+  addUserMessage(text);
+
+  showTyping();
+
+  const delay = 800 + Math.random() * 400;
+
+  setTimeout(() => {
+    removeTyping();
+    reply(category);
+  }, delay);
+}
+
+/* タイピング表示 */
+function showTyping() {
+  const chat = document.getElementById("chat");
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "message left";
+
+  const icon = document.createElement("img");
+  icon.src = "icon.png"; // ←ここに画像
+  icon.className = "icon";
+
+  const bubble = document.createElement("div");
+  bubble.className = "typing";
+  bubble.innerHTML = `<div class="dots"><span>・</span><span>・</span><span>・</span></div>`;
+
+  wrapper.appendChild(icon);
+  wrapper.appendChild(bubble);
+  chat.appendChild(wrapper);
+
+  typingElement = wrapper;
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* タイピング削除 */
+function removeTyping() {
+  if (typingElement) typingElement.remove();
+}
+
+/* 返信 */
+function reply(category) {
+  const list = messages[category];
+  const text = list[Math.floor(Math.random() * list.length)];
+  typeMessage(text);
+}
+
+/* 1文字ずつ表示 */
+function typeMessage(text) {
+  const chat = document.getElementById("chat");
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "message left";
+
+  const icon = document.createElement("img");
+  icon.src = "icon.png";
+  icon.className = "icon";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+
+  wrapper.appendChild(icon);
+  wrapper.appendChild(bubble);
+  chat.appendChild(wrapper);
+
+  let i = 0;
+  const speed = 30;
+
+  function typing() {
+    if (i < text.length) {
+      bubble.innerText += text[i];
+      i++;
+      chat.scrollTop = chat.scrollHeight;
+      setTimeout(typing, speed);
+    }
+  }
+
+  typing();
+}
+
+/* 自分のメッセージ */
+function addUserMessage(text) {
+  const chat = document.getElementById("chat");
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "message right";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerText = text;
+
+  wrapper.appendChild(bubble);
+  chat.appendChild(wrapper);
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* 初回メッセージ */
+setTimeout(() => {
+  typeMessage("今日もおつかれさま ☕");
+}, 400);
+</script>
+
+</body>
+</html>
