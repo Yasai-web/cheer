@@ -51,7 +51,7 @@ body {
   flex: 1;
   padding: 12px;
   overflow-y: auto;
-  padding-bottom: 20px;
+  padding-bottom: 120px; /* ★重要修正 */
 }
 
 /* メッセージ */
@@ -112,6 +112,8 @@ body {
   background: #f3eeee;
   position: sticky;
   bottom: 0;
+  flex-shrink: 0;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
 
 .buttons {
@@ -130,6 +132,11 @@ button {
   background: #fff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   flex-shrink: 0;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.96);
 }
 
 .icon-mini { font-size: 16px; }
@@ -161,10 +168,10 @@ button {
 let lastMessage="";
 let typingElement=null;
 
-/* ===== メッセージ（完全版）===== */
-const messages = {
-
+/* メッセージ */
+const messages={
 tired: [
+"今日は休むのが正解だよ〜","無理しなくていいよ😊","ゆっくりで大丈夫だよ",
 "今日もちゃんとやってるよ、えらい","無理しなくていい日もあるよ","ちょっと休んでも大丈夫",
 "あなたのペースでいいよ","今日はゆっくりでもOK","自分に優しくしてあげてね",
 "今は休むタイミングかもね","それだけやれたら十分だよ","疲れてるってことは、ちゃんとやってきた証拠",
@@ -177,8 +184,9 @@ tired: [
 ],
 
 down: [
+"ちゃんと頑張ってるよ","自分を責めなくていいよ",
 "ここまで来ただけで十分すごい","ちゃんと頑張ってるの知ってるよ","大丈夫、ちゃんと進んでるよ",
-"ここまで続けてるのがすごい","ちゃんと向き合っててえらい","自分を責めなくていい",
+"ここまで続けてるのがすごい","ちゃんと向き合っててえらい",
 "そのままのあなたで大丈夫","よくここまで来たね","小さなことでも価値があるよ",
 "誰かと比べなくていい","あなたなりに頑張ってる","その気持ち、ちゃんと意味があるよ",
 "今の自分を認めてあげて","焦らなくて大丈夫","今日もよくやってる",
@@ -211,73 +219,95 @@ nomotivation: [
 
 all: []
 };
-
-/* all生成 */
 messages.all=[...messages.tired,...messages.down,...messages.nomotivation];
 
+/* スクロール安定版 */
+function scrollToBottom(){
+ const chat=document.getElementById("chat");
+ chat.scrollTo({
+   top:chat.scrollHeight,
+   behavior:"smooth"
+ });
+}
+
+/* ユーザー送信 */
 function userSend(text,cat){
  addUser(text);
  showTyping();
  setTimeout(()=>{removeTyping();reply(cat);},800+Math.random()*400);
 }
 
+/* タイピング表示 */
 function showTyping(){
  const c=document.getElementById("chat");
  const w=document.createElement("div");
  w.className="message left";
+
  const i=document.createElement("img");
  i.src="icon.png";
  i.className="icon";
+
  const b=document.createElement("div");
  b.className="typing";
  b.innerHTML='<div class="dots"><span>・</span><span>・</span><span>・</span></div>';
+
  w.appendChild(i);w.appendChild(b);c.appendChild(w);
- typingElement=w;c.scrollTop=c.scrollHeight;
+ typingElement=w;
+ scrollToBottom();
 }
 
 function removeTyping(){if(typingElement)typingElement.remove();}
 
+/* 返信 */
 function reply(cat){
  const list=messages[cat];
- let t;
- do{t=list[Math.floor(Math.random()*list.length)];}while(t===lastMessage);
- lastMessage=t;
+ let t=list[Math.floor(Math.random()*list.length)];
  typeMessage(t);
 }
 
+/* 1文字ずつ */
 function typeMessage(text){
  const c=document.getElementById("chat");
  const w=document.createElement("div");
  w.className="message left";
+
  const i=document.createElement("img");
  i.src="icon.png";
  i.className="icon";
+
  const b=document.createElement("div");
  b.className="bubble";
- w.appendChild(i);w.appendChild(b);c.appendChild(w);
+
+ w.appendChild(i);w.appendChild(b);
+ c.appendChild(w);
 
  let n=0;
- (function t(){
+ (function typing(){
   if(n<text.length){
    b.innerText+=text[n++];
-   c.scrollTop=c.scrollHeight;
-   setTimeout(t,30);
+   scrollToBottom();
+   setTimeout(typing,30);
   }
  })();
 }
 
+/* 自分 */
 function addUser(text){
  const c=document.getElementById("chat");
  const w=document.createElement("div");
  w.className="message right";
+
  const b=document.createElement("div");
  b.className="bubble";
  b.innerText=text;
+
  w.appendChild(b);
  c.appendChild(w);
- c.scrollTop=c.scrollHeight;
+
+ scrollToBottom();
 }
 
+/* 初回 */
 setTimeout(()=>{typeMessage("今日もおつかれさま ☕");},400);
 </script>
 
