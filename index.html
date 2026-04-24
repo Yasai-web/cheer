@@ -13,19 +13,37 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden; /* ★重要：画面固定 */
+  overflow: hidden;
 }
 
 /* ヘッダー */
 .header {
   background: #e7c1c1;
-  padding: 14px;
-  text-align: center;
-  font-size: 18px;
-  color: #5a4a4a;
+  padding: 10px 12px;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
-  flex-shrink: 0;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 18px;
+  color: #5a4a4a;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  font-size: 18px;
 }
 
 /* チャット */
@@ -33,7 +51,7 @@ body {
   flex: 1;
   padding: 12px;
   overflow-y: auto;
-  padding-bottom: 20px; /* ★余白追加 */
+  padding-bottom: 20px;
 }
 
 /* メッセージ */
@@ -45,7 +63,6 @@ body {
 .left { justify-content: flex-start; }
 .right { justify-content: flex-end; }
 
-/* アイコン */
 .icon {
   width: 38px;
   height: 38px;
@@ -55,7 +72,6 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* 吹き出し */
 .bubble {
   padding: 12px 16px;
   border-radius: 18px;
@@ -66,18 +82,12 @@ body {
   white-space: pre-line;
 }
 
-.left .bubble {
-  background: #ffffff;
-}
-
-.right .bubble {
-  background: #e7c1c1;
-  color: #4a3a3a;
-}
+.left .bubble { background: #fff; }
+.right .bubble { background: #e7c1c1; }
 
 /* タイピング */
 .typing {
-  background: #ffffff;
+  background: #fff;
   padding: 10px 14px;
   border-radius: 18px;
 }
@@ -96,25 +106,20 @@ body {
   100% { opacity: 0; }
 }
 
-/* ボタンエリア（固定） */
+/* ボタン */
 .controls {
   padding: 10px;
   background: #f3eeee;
   position: sticky;
   bottom: 0;
-  flex-shrink: 0;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
 
-/* 横スクロール */
 .buttons {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  white-space: nowrap;
 }
 
-/* ボタン */
 button {
   display: flex;
   align-items: center;
@@ -122,167 +127,158 @@ button {
   border: none;
   padding: 10px 14px;
   border-radius: 20px;
-  background: #ffffff;
+  background: #fff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  font-size: 13px;
   flex-shrink: 0;
-  cursor: pointer;
 }
 
-button:active {
-  transform: scale(0.96);
-}
-
-.icon-mini {
-  font-size: 16px;
-}
+.icon-mini { font-size: 16px; }
 </style>
 </head>
 
 <body>
 
-<div class="header">ひとやすみ</div>
+<div class="header">
+  <div class="header-inner">
+    <div class="icon-btn">♡</div>
+    <div class="title">ひとやすみ</div>
+    <div class="icon-btn">☰</div>
+  </div>
+</div>
+
 <div id="chat" class="chat"></div>
 
 <div class="controls">
   <div class="buttons">
-    <button onclick="userSend('疲れた', 'tired')">
-      <span class="icon-mini">😴</span>疲れた
-    </button>
-    <button onclick="userSend('落ち込んだ', 'down')">
-      <span class="icon-mini">😢</span>落ち込んだ
-    </button>
-    <button onclick="userSend('やる気でない', 'nomotivation')">
-      <span class="icon-mini">🌱</span>やる気でない
-    </button>
-    <button onclick="userSend('おまかせ', 'all')">
-      <span class="icon-mini">💗</span>おまかせ
-    </button>
+    <button onclick="userSend('疲れた','tired')"><span class="icon-mini">😴</span>疲れた</button>
+    <button onclick="userSend('落ち込んだ','down')"><span class="icon-mini">😢</span>落ち込んだ</button>
+    <button onclick="userSend('やる気でない','nomotivation')"><span class="icon-mini">🌱</span>やる気でない</button>
+    <button onclick="userSend('おまかせ','all')"><span class="icon-mini">💗</span>おまかせ</button>
   </div>
 </div>
 
 <script>
-let lastMessage = "";
-let typingElement = null;
+let lastMessage="";
+let typingElement=null;
 
+/* ===== メッセージ（完全版）===== */
 const messages = {
-  tired: [
-    "今日は休むのが正解だよ〜",
-    "無理しなくていいよ😊",
-    "ゆっくりで大丈夫だよ"
-  ],
-  down: [
-    "そんな日もあるよ",
-    "ちゃんと頑張ってるよ",
-    "自分を責めなくていいよ"
-  ],
-  nomotivation: [
-    "1分だけやってみよう",
-    "始めるだけでえらい",
-    "小さくても一歩だよ"
-  ],
-  all: [
-    "今日もおつかれさま ☕",
-    "ちゃんとやってるよ",
-    "ゆっくりいこうね"
-  ]
+
+tired: [
+"今日もちゃんとやってるよ、えらい","無理しなくていい日もあるよ","ちょっと休んでも大丈夫",
+"あなたのペースでいいよ","今日はゆっくりでもOK","自分に優しくしてあげてね",
+"今は休むタイミングかもね","それだけやれたら十分だよ","疲れてるってことは、ちゃんとやってきた証拠",
+"少しずつでいいんだよ","今日は生きてるだけでOK","無理しない選択も正解だよ",
+"今は立ち止まってもいいよ","ちゃんと休憩とっていいんだよ","できない日もある、それでいい",
+"今日は軽めでいこう","頑張りすぎなくていい","少し深呼吸してみよう",
+"疲れてるなら休もう","今は充電の時間かも","ゆっくりいこうね",
+"今日は“省エネモード”でいこう","今日は低燃費でいこう","とりあえずおやつタイムにしよ？",
+"コーヒー飲んだら勝ち☕"
+],
+
+down: [
+"ここまで来ただけで十分すごい","ちゃんと頑張ってるの知ってるよ","大丈夫、ちゃんと進んでるよ",
+"ここまで続けてるのがすごい","ちゃんと向き合っててえらい","自分を責めなくていい",
+"そのままのあなたで大丈夫","よくここまで来たね","小さなことでも価値があるよ",
+"誰かと比べなくていい","あなたなりに頑張ってる","その気持ち、ちゃんと意味があるよ",
+"今の自分を認めてあげて","焦らなくて大丈夫","今日もよくやってる",
+"無理して笑わなくていいよ","それでもここにいるのがすごい","思ってるより大丈夫",
+"時間が経てば小さくなる","冷静に見るとそこまで悪くない",
+"できないことがあって普通","人はそんなに完璧じゃない","後で見たら気にしないかも",
+"考えすぎなくて大丈夫","まぁそんな日もあるよね",
+
+/* 共感10追加 */
+"なんか全部うまくいかない日あるよね","理由ないけどしんどい日、あるよね",
+"頑張ってるのに報われない感じ、わかる","ちょっと疲れすぎてるだけかも",
+"今日は調子悪い日ってことでOK","全部投げ出したくなる日もある",
+"うまくいかない時期ってあるよね","気分が乗らない日、普通にある",
+"ちゃんとやってるのにしんどいよね","今はそういう波かもね"
+],
+
+nomotivation: [
+"小さくても一歩は一歩","できることからでOK","少しだけやってみよう",
+"完璧じゃなくていい","やった分はちゃんと残る","今の努力は無駄じゃない",
+"今日の1%が未来を変える","続けてるだけで強い","できる範囲で進もう",
+"少しでも動いたら勝ち","やれば意外といけるかも","まずは1分だけやってみよう",
+"昨日よりちょっとでいい","その一歩が大事","途中でもいいから進もう",
+"今日も何か一つやれたらOK","やる気は後からついてくる","今できることをやろう",
+"全部じゃなくていい","少しずつでも積み上がる","今の自分でできることを",
+"スタートが一番えらい","やらないよりちょっとやる","未来の自分が助かるよ",
+"一歩進めば景色が変わる","できたらラッキーくらいで","軽くやってみよう",
+"今がスタートでも遅くない","少しでも前に進もう","とりあえず一歩だけ",
+"始めるだけで勝ち"
+],
+
+all: []
 };
 
-function userSend(text, category) {
-  addUserMessage(text);
-  showTyping();
+/* all生成 */
+messages.all=[...messages.tired,...messages.down,...messages.nomotivation];
 
-  const delay = 800 + Math.random() * 400;
-
-  setTimeout(() => {
-    removeTyping();
-    reply(category);
-  }, delay);
+function userSend(text,cat){
+ addUser(text);
+ showTyping();
+ setTimeout(()=>{removeTyping();reply(cat);},800+Math.random()*400);
 }
 
-function showTyping() {
-  const chat = document.getElementById("chat");
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "message left";
-
-  const icon = document.createElement("img");
-  icon.src = "icon.png";
-  icon.className = "icon";
-
-  const bubble = document.createElement("div");
-  bubble.className = "typing";
-  bubble.innerHTML = `<div class="dots"><span>・</span><span>・</span><span>・</span></div>`;
-
-  wrapper.appendChild(icon);
-  wrapper.appendChild(bubble);
-  chat.appendChild(wrapper);
-
-  typingElement = wrapper;
-  chat.scrollTop = chat.scrollHeight;
+function showTyping(){
+ const c=document.getElementById("chat");
+ const w=document.createElement("div");
+ w.className="message left";
+ const i=document.createElement("img");
+ i.src="icon.png";
+ i.className="icon";
+ const b=document.createElement("div");
+ b.className="typing";
+ b.innerHTML='<div class="dots"><span>・</span><span>・</span><span>・</span></div>';
+ w.appendChild(i);w.appendChild(b);c.appendChild(w);
+ typingElement=w;c.scrollTop=c.scrollHeight;
 }
 
-function removeTyping() {
-  if (typingElement) typingElement.remove();
+function removeTyping(){if(typingElement)typingElement.remove();}
+
+function reply(cat){
+ const list=messages[cat];
+ let t;
+ do{t=list[Math.floor(Math.random()*list.length)];}while(t===lastMessage);
+ lastMessage=t;
+ typeMessage(t);
 }
 
-function reply(category) {
-  const list = messages[category];
-  const text = list[Math.floor(Math.random() * list.length)];
-  typeMessage(text);
-}
+function typeMessage(text){
+ const c=document.getElementById("chat");
+ const w=document.createElement("div");
+ w.className="message left";
+ const i=document.createElement("img");
+ i.src="icon.png";
+ i.className="icon";
+ const b=document.createElement("div");
+ b.className="bubble";
+ w.appendChild(i);w.appendChild(b);c.appendChild(w);
 
-function typeMessage(text) {
-  const chat = document.getElementById("chat");
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "message left";
-
-  const icon = document.createElement("img");
-  icon.src = "icon.png";
-  icon.className = "icon";
-
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-
-  wrapper.appendChild(icon);
-  wrapper.appendChild(bubble);
-  chat.appendChild(wrapper);
-
-  let i = 0;
-  const speed = 30;
-
-  function typing() {
-    if (i < text.length) {
-      bubble.innerText += text[i];
-      i++;
-      chat.scrollTop = chat.scrollHeight;
-      setTimeout(typing, speed);
-    }
+ let n=0;
+ (function t(){
+  if(n<text.length){
+   b.innerText+=text[n++];
+   c.scrollTop=c.scrollHeight;
+   setTimeout(t,30);
   }
-
-  typing();
+ })();
 }
 
-function addUserMessage(text) {
-  const chat = document.getElementById("chat");
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "message right";
-
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-  bubble.innerText = text;
-
-  wrapper.appendChild(bubble);
-  chat.appendChild(wrapper);
-
-  chat.scrollTop = chat.scrollHeight;
+function addUser(text){
+ const c=document.getElementById("chat");
+ const w=document.createElement("div");
+ w.className="message right";
+ const b=document.createElement("div");
+ b.className="bubble";
+ b.innerText=text;
+ w.appendChild(b);
+ c.appendChild(w);
+ c.scrollTop=c.scrollHeight;
 }
 
-setTimeout(() => {
-  typeMessage("今日もおつかれさま ☕");
-}, 400);
+setTimeout(()=>{typeMessage("今日もおつかれさま ☕");},400);
 </script>
 
 </body>
